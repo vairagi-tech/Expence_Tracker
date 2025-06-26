@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import Layout from "./../components/Layout/Layout";
 import axios from "axios";
-import Spinner from "./../components/Spinner";
+import Loder from "./../components/Loder";
 import moment from "moment";
 import Analytics from "../components/Analytics";
 const { RangePicker } = DatePicker;
@@ -16,7 +16,7 @@ const { RangePicker } = DatePicker;
 const HomePage = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [allTransection, setAllTransection] = useState([]);
+  const [allExpense, setAllExpense] = useState([]);
   const [frequency, setFrequency] = useState("7");
   const [selectedDate, setSelectedate] = useState([]);
   const [type, setType] = useState("all");
@@ -75,28 +75,26 @@ const HomePage = () => {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
         setLoading(true);
-        const res = await axios.post("/api/v1/transections/get-transection", {
+        const res = await axios.post("/api/v1/expenses/filter", {
           userid: user._id,
           frequency,
           selectedDate,
           type,
         });
-        setAllTransection(res.data);
+        setAllExpense(res.data);
         setLoading(false);
       } catch (error) {
-        message.error("Ftech Issue With Tranction");
+        message.error("Fetch Issue With Expense");
       }
     };
     getAllTransactions();
-  }, [frequency, selectedDate, type, setAllTransection]);
+  }, [frequency, selectedDate, type, setAllExpense]);
 
   //delete handler
   const handleDelete = async (record) => {
     try {
       setLoading(true);
-      await axios.post("/api/v1/transections/delete-transection", {
-        transacationId: record._id,
-      });
+      await axios.delete(`/api/v1/expenses/${record._id}`);
       setLoading(false);
       message.success("Transaction Deleted!");
     } catch (error) {
@@ -112,17 +110,17 @@ const HomePage = () => {
       const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
       if (editable) {
-        await axios.post("/api/v1/transections/edit-transection", {
+        await axios.post("/api/v1/expenses/edit-expense", {
           payload: {
             ...values,
             userId: user._id,
           },
-          transacationId: editable._id,
+          transactionId: editable._id,
         });
         setLoading(false);
         message.success("Transaction Updated Successfully");
       } else {
-        await axios.post("/api/v1/transections/add-transection", {
+        await axios.post("/api/v1/expenses/add-expense", {
           ...values,
           userid: user._id,
         });
@@ -139,7 +137,7 @@ const HomePage = () => {
 
   return (
     <Layout>
-      {loading && <Spinner />}
+      {loading && <Loder />}
       <div className="filters">
         <div>
           <h6>Select Frequency</h6>
@@ -189,13 +187,13 @@ const HomePage = () => {
       </div>
       <div className="content">
         {viewData === "table" ? (
-          <Table columns={columns} dataSource={allTransection} />
+          <Table columns={columns} dataSource={allExpense} />
         ) : (
-          <Analytics allTransection={allTransection} />
+          <Analytics allExpense={allExpense} />
         )}
       </div>
       <Modal
-        title={editable ? "Edit Transaction" : "Add Transection"}
+        title={editable ? "Edit Transaction" : "Add Expense"}
         open={showModal}
         onCancel={() => setShowModal(false)}
         footer={false}
