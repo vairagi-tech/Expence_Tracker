@@ -52,10 +52,15 @@ const getAllExpenses = async (req, res) => {
 const updateExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedData = req.body.payload;
-
-    await expenseModel.findByIdAndUpdate(id, updatedData);
-    res.status(200).send("Expense updated successfully.");
+    const updatedExpense = await expenseModel.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true }
+    );
+    if (!updatedExpense) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+    res.status(200).json({ message: "Expense updated", updatedExpense });
   } catch (error) {
     console.error("Error updating expense:", error);
     res.status(500).json({ error: "Failed to update expense." });

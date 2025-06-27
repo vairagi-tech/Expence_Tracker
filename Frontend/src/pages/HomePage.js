@@ -22,6 +22,7 @@ const HomePage = () => {
   const [type, setType] = useState("all");
   const [viewData, setViewData] = useState("table");
   const [editable, setEditable] = useState(null);
+  const [form] = Form.useForm();
 
   //table data
   const columns = [
@@ -70,25 +71,38 @@ const HomePage = () => {
   //getall transactions
 
   //useEffect Hook
+  const getAllTransactions = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      setLoading(true);
+      const res = await axios.post("/api/v1/expenses/filter", {
+        userid: user._id,
+        frequency,
+        selectedDate,
+        type,
+      });
+      setAllExpense(res.data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      message.error("Fetch Issue With Expense");
+    }
+  };
+
   useEffect(() => {
-    const getAllTransactions = async () => {
-      try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        setLoading(true);
-        const res = await axios.post("/api/v1/expenses/filter", {
-          userid: user._id,
-          frequency,
-          selectedDate,
-          type,
-        });
-        setAllExpense(res.data);
-        setLoading(false);
-      } catch (error) {
-        message.error("Fetch Issue With Expense");
-      }
-    };
     getAllTransactions();
-  }, [frequency, selectedDate, type, setAllExpense]);
+  }, [frequency, selectedDate, type]);
+
+  useEffect(() => {
+    if (editable) {
+      form.setFieldsValue({
+        ...editable,
+        date: moment(editable.date).format("YYYY-MM-DD"),
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [editable, form]);
 
   //delete handler
   const handleDelete = async (record) => {
@@ -97,6 +111,7 @@ const HomePage = () => {
       await axios.delete(`/api/v1/expenses/${record._id}`);
       setLoading(false);
       message.success("Transaction Deleted!");
+     getAllTransactions();
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -110,17 +125,14 @@ const HomePage = () => {
       const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
       if (editable) {
-        await axios.post("/api/v1/expenses/edit-expense", {
-          payload: {
-            ...values,
-            userId: user._id,
-          },
-          transactionId: editable._id,
+        await axios.put(`/api/v1/expenses/${editable._id}`, {
+          ...values,
+          userid: user._id,
         });
         setLoading(false);
         message.success("Transaction Updated Successfully");
       } else {
-        await axios.post("/api/v1/expenses/add-expense", {
+        await axios.post("/api/v1/expenses/", {
           ...values,
           userid: user._id,
         });
@@ -129,6 +141,7 @@ const HomePage = () => {
       }
       setShowModal(false);
       setEditable(null);
+      getAllTransactions();
     } catch (error) {
       setLoading(false);
       message.error("please fill all fields");
@@ -187,7 +200,7 @@ const HomePage = () => {
       </div>
       <div className="content">
         {viewData === "table" ? (
-          <Table columns={columns} dataSource={allExpense} />
+          <Table columns={columns} dataSource={allExpense} rowKey="_id" />
         ) : (
           <Analytics allExpense={allExpense} />
         )}
@@ -199,9 +212,9 @@ const HomePage = () => {
         footer={false}
       >
         <Form
+          form={form}
           layout="vertical"
           onFinish={handleSubmit}
-          initialValues={editable}
         >
           <Form.Item label="Amount" name="amount">
             <Input type="text" required />
