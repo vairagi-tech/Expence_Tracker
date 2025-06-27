@@ -68,7 +68,7 @@ const HomePage = () => {
     },
   ];
 
-  //getall transactions
+//all expenses
 
   //useEffect Hook
   const getAllTransactions = async () => {
@@ -125,9 +125,14 @@ const HomePage = () => {
       const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
       if (editable) {
+        // console.log("EDIT ID:", editable?._id); 
+        // console.log("Edit Payload:", values);
+        // console.log("Type of date:", typeof values.date, values.date); 
+
         await axios.put(`/api/v1/expenses/${editable._id}`, {
           ...values,
           userid: user._id,
+          date: new Date(values.date),
         });
         setLoading(false);
         message.success("Transaction Updated Successfully");

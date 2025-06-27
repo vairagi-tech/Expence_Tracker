@@ -1,7 +1,6 @@
 import React from "react";
 import { Progress } from "antd";
 const Analytics = ({ allExpense }) => {
-  // category
   const categories = [
     "salary",
     "tip",
@@ -14,7 +13,7 @@ const Analytics = ({ allExpense }) => {
     "tax",
   ];
 
-  // total transaction
+  // transaction
   const totalTransaction = allExpense.length;
   const totalIncomeTransactions = allExpense.filter(
     (transaction) => transaction.type === "income"
@@ -27,11 +26,7 @@ const Analytics = ({ allExpense }) => {
   const totalExpensePercent =
     (totalExpenseTransactions.length / totalTransaction) * 100;
 
-  //total turnover
-  const totalTurnover = allExpense.reduce(
-    (acc, transaction) => acc + transaction.amount,
-    0
-  );
+  // turnover
   const totalIncomeTurnover = allExpense
     .filter((transaction) => transaction.type === "income")
     .reduce((acc, transaction) => acc + transaction.amount, 0);
@@ -39,6 +34,8 @@ const Analytics = ({ allExpense }) => {
   const totalExpenseTurnover = allExpense
     .filter((transaction) => transaction.type === "expense")
     .reduce((acc, transaction) => acc + transaction.amount, 0);
+
+  const totalTurnover = totalIncomeTurnover + totalExpenseTurnover;
 
   const totalIncomeTurnoverPercent =
     (totalIncomeTurnover / totalTurnover) * 100;

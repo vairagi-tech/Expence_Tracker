@@ -1,24 +1,24 @@
-const expenseModel = require("../models/expenseModel");
+const transectionModel = require("../models/expenseModel");
 const moment = require("moment");
 
-//Add 
+//Add  expense
 const addExpense = async (req, res) => {
   try {
-    const newExpense = new expenseModel(req.body);
+    const newExpense = new transectionModel(req.body);
     await newExpense.save();
     res.status(201).send("Expense added successfully.");
   } catch (error) {
     console.error("Error adding expense:", error);
-    res.status(500).json({ error: "Error while adding expense." });
+    res.status(500).json({ error: "Something went wrong while adding expense." });
   }
 };
 
-//Get 
+//get expense
 const getAllExpenses = async (req, res) => {
   try {
     const { frequency, selectedDate, type, userid } = req.body;
 
-    
+   
     const dateFilter =
       frequency !== "custom"
         ? {
@@ -35,7 +35,7 @@ const getAllExpenses = async (req, res) => {
 
     const typeFilter = type !== "all" ? { type } : {};
 
-    const expenses = await expenseModel.find({
+    const expenses = await transectionModel.find({
       ...dateFilter,
       userid,
       ...typeFilter,
@@ -48,32 +48,25 @@ const getAllExpenses = async (req, res) => {
   }
 };
 
-// Update 
+//Update 
 const updateExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('Update request for ID:', id);
-    console.log('Update payload:', req.body);
-    const updatedExpense = await expenseModel.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedExpense) {
-      return res.status(404).json({ error: "Expense not found" });
-    }
-    res.status(200).json({ message: "Expense updated", updatedExpense });
+    const updatedData = req.body.payload;
+
+    await transectionModel.findByIdAndUpdate(id, updatedData);
+    res.status(200).send("Expense updated successfully.");
   } catch (error) {
     console.error("Error updating expense:", error);
     res.status(500).json({ error: "Failed to update expense." });
   }
 };
 
-/// Delete 
+// Delete
 const deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    await expenseModel.findByIdAndDelete(id);
+    await transectionModel.findByIdAndDelete(id);
     res.status(200).send("Expense deleted successfully.");
   } catch (error) {
     console.error("Error deleting expense:", error);

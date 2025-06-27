@@ -41,5 +41,4 @@ The Expense Tracker application is designed to help users manage their personal 
 - `npm test`: Launches the test runner.
 - `npm run build`: Builds the app for production.
 
-## License
-This project is licensed under the MIT License.
+
